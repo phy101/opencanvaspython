@@ -8,3 +8,4 @@ supabase
 langchain-anthropic
 langchain-community
 tavily-python
+langgraph-cli[inmem]

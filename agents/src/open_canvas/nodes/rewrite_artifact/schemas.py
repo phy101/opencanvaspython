@@ -1,7 +1,7 @@
 from enum import Enum
 from pydantic import BaseModel, Field
 from typing import Optional
-from ..shared.constants import PROGRAMMING_LANGUAGES
+from shared.src.constants import PROGRAMMING_LANGUAGES
 
 class ArtifactType(str, Enum):
     TEXT = "text"

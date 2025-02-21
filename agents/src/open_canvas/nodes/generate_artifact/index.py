@@ -1,9 +1,9 @@
 from typing import Dict, Any
 from langchain_core.messages import BaseMessage
-from langgraph.graph import LangGraphRunnableConfig
-from ..state import OpenCanvasGraphState
-from ..shared.types import ArtifactV3
-from ...utils import (
+from langchain_core.runnables import RunnableConfig
+from agents.src.open_canvas.state import OpenCanvasGraphState
+from shared.src.types import ArtifactV3
+from agents.src.utils import (
     create_context_document_messages,
     get_formatted_reflections,
     get_model_config,
@@ -11,12 +11,12 @@ from ...utils import (
     is_using_o1_mini_model,
     optionally_get_system_prompt_from_config
 )
-from .schemas import ARTIFACT_TOOL_SCHEMA
-from .utils import create_artifact_content, format_new_artifact_prompt
+from agents.src.open_canvas.nodes.generate_artifact.utils import format_new_artifact_prompt, create_artifact_content
+from agents.src.open_canvas.nodes.generate_artifact.schemas import ArtifactToolSchema
 
 async def generate_artifact(
     state: OpenCanvasGraphState,
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Dict[str, Any]:
     model_config = get_model_config(config, is_tool_calling=True)
     model_name = model_config.get("model_name")
@@ -30,8 +30,8 @@ async def generate_artifact(
     model_with_tool = small_model.bind_tools(
         [{
             "name": "generate_artifact",
-            "description": ARTIFACT_TOOL_SCHEMA["description"],
-            "schema": ARTIFACT_TOOL_SCHEMA
+            "description": ArtifactToolSchema["description"],
+            "schema": ArtifactToolSchema
         }],
         tool_choice="generate_artifact"
     )

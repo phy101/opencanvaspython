@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from .types import ProgrammingLanguageOptions
+from shared.src.types import ProgrammingLanguageOptions
 
 OC_SUMMARIZED_MESSAGE_KEY = "__oc_summarized_message"
 OC_HIDE_FROM_UI_KEY = "__oc_hide_from_ui"

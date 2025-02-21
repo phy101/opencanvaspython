@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, TypeVar, Union, Optional
-from ..types import ArtifactCodeV3, ArtifactMarkdownV3, ArtifactV3, Artifact
+from shared.src.types import ArtifactCodeV3, ArtifactMarkdownV3, ArtifactV3, Artifact
 
 def is_artifact_code_content(content: Any) -> bool:
     """

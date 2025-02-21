@@ -1,15 +1,16 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 import uuid
 from langchain_core.messages import HumanMessage
-from ..utils import (
-    FireCrawlLoader,
-    get_model_from_config,
-    traceable
-)
-from ..shared.types import SearchResult
-from ..shared.constants import OC_WEB_SEARCH_RESULTS_MESSAGE_KEY
+from agents.src.utils import get_model_from_config
+from shared.src.types import SearchResult
+from shared.src.constants import OC_WEB_SEARCH_RESULTS_MESSAGE_KEY
+from langchain_community.document_loaders import FireCrawlLoader
+import asyncio
+from langsmith import traceable
 
-PROMPT = """You're an advanced AI assistant tasked with analyzing the user's message and determining if the user wants the contents of the URL included in their message included in their prompt.
+
+PROMPT = """You're an advanced AI assistant.
+You have been tasked with analyzing the user's message and determining if the user wants the contents of the URL included in their message included in their prompt.
 You should ONLY answer 'true' if it is explicitly clear the user included the URL in their message so that its contents would be included in the prompt, otherwise, answer 'false'
 
 Here is the user's message:
@@ -21,71 +22,93 @@ Now, given their message, determine whether or not they want the contents of tha
 
 SCHEMA = {
     "name": "determine_include_url_contents",
-    "description": "Whether to include URL contents in the prompt",
-    "parameters": {
+    "description": "Whether or not the user's message indicates the contents of the URL should be included in the prompt.",
+    "schema": {
         "type": "object",
         "properties": {
-            "should_include_url_contents": {
+            "shouldIncludeUrlContents": {
                 "type": "boolean",
-                "description": "Whether to include the URL contents in the prompt"
+                "description": "Whether or not to include the contents of the URL in the prompt."
             }
-        }
+        },
+        "required": ["shouldIncludeUrlContents"]
     }
 }
+
+@traceable(name="fetch_url_contents")
+async def fetch_url_contents(url: str) -> Dict[str, str]:
+    """Fetch contents from a URL using FireCrawl."""
+    loader = FireCrawlLoader(
+        url=url,
+        mode="scrape",
+        params={"formats": ["markdown"]}
+    )
+    docs = await loader.load()
+    return {
+        "url": url,
+        "pageContent": docs[0].page_content if docs else ""
+    }
 
 @traceable(name="include_url_contents")
 async def include_url_contents(
     message: HumanMessage,
     urls: List[str]
 ) -> Optional[HumanMessage]:
-    try:
-        prompt = PROMPT.format(message=message.content)
+    """Process URLs in message and optionally include their contents.
+    
+    Args:
+        message: The user's message
+        urls: List of URLs found in the message
         
-        # Initialize model
+    Returns:
+        Optional[HumanMessage]: Modified message with URL contents if needed
+    """
+    try:
+        # Format prompt with message content
+        formatted_prompt = PROMPT.format(message=message.content)
+
+        # Initialize model with tools
         model = await get_model_from_config(
-            {"model_name": "gemini-2.0-flash", "model_provider": "google-genai"},
+            {"model_name": "gpt-4o-mini", "model_provider": "azure_openai"},
             {"temperature": 0}
         )
-        model_with_tool = model.bind_tools([SCHEMA], tool_choice="determine_include_url_contents")
-        
-        # Get decision from model
-        response = await model_with_tool.invoke([("user", prompt)])
-        if not response.tool_calls:
-            return None
-            
-        args = response.tool_calls[0]["args"]
-        if not args.get("should_include_url_contents"):
+        model_with_tools = model.bind_tools(
+            tools=[SCHEMA],
+            tool_choice="determine_include_url_contents"
+        )
+
+        # Get model's decision
+        result = await model_with_tools.invoke([
+            {"role": "user", "content": formatted_prompt}
+        ])
+
+        # Check if we should include URL contents
+        args = result.tool_calls[0].args if result.tool_calls else None
+        if not args or not args.get("shouldIncludeUrlContents"):
             return None
 
-        # Fetch URL contents
-        contents = []
-        for url in urls:
-            loader = FireCrawlLoader(url=url, mode="scrape", params={"formats": ["markdown"]})
-            docs = await loader.load()
-            if docs:
-                contents.append({
-                    "url": url,
-                    "content": docs[0].page_content
-                })
+        # Fetch and process URL contents
+        url_contents = await asyncio.gather(*[
+            fetch_url_contents(url) for url in urls
+        ])
 
-        # Update message content
-        updated_content = message.content
-        for item in contents:
-            updated_content = updated_content.replace(
-                item["url"],
-                f'<page-contents url="{item["url"]}">\n{item["content"]}\n</page-contents>'
+        # Transform the prompt with URL contents
+        transformed_prompt = message.content
+        for content in url_contents:
+            transformed_prompt = transformed_prompt.replace(
+                content["url"],
+                f'<page-contents url="{content["url"]}">\n{content["pageContent"]}\n</page-contents>'
             )
 
+        # Return modified message
         return HumanMessage(
-            id=f"web-content-{uuid.uuid4()}",
-            content=updated_content,
+            content=transformed_prompt,
             additional_kwargs={
-                OC_WEB_SEARCH_RESULTS_MESSAGE_KEY: True,
-                "webSearchResults": contents,
-                "webSearchStatus": "done"
+                **message.additional_kwargs,
+                "id": f"web-content-{uuid.uuid4()}"
             }
         )
 
     except Exception as e:
-        print(f"Error including URL contents: {e}")
+        print(f"Failed to handle included URLs: {e}")
         return None 

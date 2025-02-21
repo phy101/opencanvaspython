@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from langchain_anthropic import ChatAnthropic
 from datetime import datetime
-from ..state import WebSearchState
+from agents.src.web_search.state import WebSearchState
 
 QUERY_GENERATOR_PROMPT = """You're a helpful AI assistant tasked with writing a query to search the web.
 You're provided with a list of messages between a user and an AI assistant.

@@ -5,10 +5,12 @@ from langgraph.graph import StateGraph, START
 from langgraph.prebuilt import ToolNode
 from pydantic import BaseModel, Field
 from shared.src.types import ArtifactV3, Reflections
-from utils import ensure_store_in_config, format_reflections
-from .state import ReflectionGraphState
-from .prompts import REFLECT_SYSTEM_PROMPT, REFLECT_USER_PROMPT
+from agents.src.utils import ensure_store_in_config, format_reflections
+from agents.src.reflection.state import ReflectionGraphState
+from agents.src.reflection.prompts import REFLECT_SYSTEM_PROMPT, REFLECT_USER_PROMPT
 from shared.src.utils.artifacts import get_artifact_content, is_artifact_markdown_content
+import dotenv
+dotenv.load_dotenv()
 
 class ReflectionToolSchema(BaseModel):
     style_rules: list[str] = Field(..., description="The complete new list of style rules and guidelines.")
@@ -80,4 +82,5 @@ async def reflect(
 builder = StateGraph(ReflectionGraphState)
 builder.add_node("reflect", reflect)
 builder.add_edge(START, "reflect")
-graph = builder.compile().configure(run_name="reflection") 
+graph = builder.compile()
+graph.name = "reflection" 

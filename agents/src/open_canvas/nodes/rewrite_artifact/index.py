@@ -1,9 +1,9 @@
 import uuid
 from typing import Dict, Any
 from langchain_core.messages import AIMessage
-from langgraph.graph import LangGraphRunnableConfig
-from ..state import OpenCanvasGraphState
-from ..utils import (
+from langchain_core.runnables import RunnableConfig
+from agents.src.open_canvas.state import OpenCanvasGraphState
+from agents.src.utils import (
     get_model_config,
     get_model_from_config,
     get_formatted_reflections,
@@ -11,21 +11,21 @@ from ..utils import (
     is_using_o1_mini_model,
     optionally_get_system_prompt_from_config
 )
-from .update_meta import optionally_update_artifact_meta
-from .utils import (
+from agents.src.open_canvas.nodes.rewrite_artifact.update_meta import optionally_update_artifact_meta
+from agents.src.open_canvas.nodes.rewrite_artifact.utils import (
     validate_state,
     build_prompt,
     create_new_artifact_content
 )
-from ..shared.utils.artifacts import is_artifact_markdown_content
-from ..shared.utils.thinking import (
+from shared.src.utils.artifacts import is_artifact_markdown_content
+from shared.src.utils.thinking import (
     extract_thinking_and_response_tokens,
     is_thinking_model
 )
 
 async def rewrite_artifact(
     state: OpenCanvasGraphState,
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Dict[str, Any]:
     model_config = get_model_config(config)
     model_name = model_config.get("model_name")

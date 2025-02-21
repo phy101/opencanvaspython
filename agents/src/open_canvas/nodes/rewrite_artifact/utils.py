@@ -1,10 +1,10 @@
 from typing import Dict, Any, Union
 from pydantic import BaseModel
-from ..state import OpenCanvasGraphState
-from ..shared.types import ArtifactCodeV3, ArtifactMarkdownV3, ProgrammingLanguageOptions
-from ..shared.utils.artifacts import get_artifact_content, is_artifact_code_content
-from ..prompts import OPTIONALLY_UPDATE_META_PROMPT, UPDATE_ENTIRE_ARTIFACT_PROMPT
-from .schemas import OptionallyUpdateArtifactMetaSchema
+from agents.src.open_canvas.state import OpenCanvasGraphState
+from shared.src.types import ArtifactCodeV3, ArtifactMarkdownV3, ProgrammingLanguageOptions
+from shared.src.utils.artifacts import get_artifact_content, is_artifact_code_content
+from agents.src.open_canvas.prompts import OPTIONALLY_UPDATE_META_PROMPT, UPDATE_ENTIRE_ARTIFACT_PROMPT
+from agents.src.open_canvas.nodes.rewrite_artifact.schemas import OptionallyUpdateArtifactMetaSchema
 
 class ValidateStateResult(BaseModel):
     current_artifact_content: Union[ArtifactCodeV3, ArtifactMarkdownV3]

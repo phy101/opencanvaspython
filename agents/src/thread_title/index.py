@@ -3,10 +3,14 @@ from typing import Dict, Any
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import BaseMessage
 from langgraph.graph import StateGraph, START
+from langgraph_sdk import get_client
 from pydantic import BaseModel, Field
 from shared.src.utils.artifacts import get_artifact_content, is_artifact_markdown_content
-from .prompts import TITLE_SYSTEM_PROMPT, TITLE_USER_PROMPT
-from aiohttp import ClientSession
+from agents.src.thread_title.prompts import TITLE_SYSTEM_PROMPT, TITLE_USER_PROMPT
+import dotenv
+
+dotenv.load_dotenv()
+
 
 class TitleGenerationState(BaseModel):
     messages: list[BaseMessage] = Field(..., description="Chat history to generate title for")
@@ -62,14 +66,13 @@ async def generate_title(
         raise ValueError("Title generation tool call failed")
     title = response.tool_calls[0]["args"]["title"]
 
-    # Update thread metadata
-    async with ClientSession() as session:
-        async with session.patch(
-            f"http://localhost:{os.getenv('PORT', '8000')}/threads/{thread_id}",
-            json={"metadata": {"thread_title": title}}
-        ) as response:
-            if response.status != 200:
-                raise ValueError(f"Failed to update thread title: {response.status}")
+    # Update thread metadata using langgraph_sdk
+    client = get_client(url=f"http://localhost:{os.getenv('PORT', '8000')}")
+    await client.threads.update(thread_id, {
+        "metadata": {
+            "thread_title": title
+        }
+    })
 
     return {}
 
@@ -77,4 +80,5 @@ async def generate_title(
 builder = StateGraph(TitleGenerationState)
 builder.add_node("title", generate_title)
 builder.add_edge(START, "title")
-graph = builder.compile().with_config(run_name="thread_title") 
+graph = builder.compile()
+graph.name = "thread_title" 

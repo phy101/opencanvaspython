@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Union, Dict, Any
+from typing import List, Literal, Optional, Union, Dict, Any, TypedDict
 from pydantic import BaseModel, Field
 from langchain_core.documents import Document
 
@@ -111,7 +111,20 @@ class ExaMetadata(BaseModel):
     image: Optional[str] = None
     favicon: Optional[str] = None
 
-SearchResult = Document[ExaMetadata]
+# Instead of Document[ExaMetadata], create a custom document class
+class SearchResult(Document):
+    class Metadata(TypedDict):
+        title: str
+        url: str
+        content: str
+        score: float  # Tavily returns relevance score
+        source_type: str  # Type of source (webpage, news, etc.)
+        created_at: Optional[str] = None  # Publication date if available
+        author: Optional[str] = None
+        image_url: Optional[str] = None
+        favicon_url: Optional[str] = None
+
+    metadata: Metadata
 
 class GraphInput(BaseModel):
     messages: Optional[List[Dict[str, Any]]] = None

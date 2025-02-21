@@ -1,18 +1,18 @@
 import os
 from typing import Dict, Any
-from langchain.langgraph_sdk import Client
-from langgraph.graph import LangGraphRunnableConfig
-from ..state import OpenCanvasGraphState
+from langgraph_sdk import get_client
+from langchain_core.runnables import RunnableConfig
+from agents.src.open_canvas.state import OpenCanvasGraphState
 
 async def summarizer(
     state: OpenCanvasGraphState,
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Dict[str, Any]:
     thread_id = config.get("configurable", {}).get("thread_id")
     if not thread_id:
         raise ValueError("Missing thread_id in summarizer config")
 
-    client = Client(api_url=f"http://localhost:{os.getenv('PORT', '8000')}")
+    client = get_client(url=f"http://localhost:{os.getenv('PORT', '8000')}")
 
     try:
         new_thread = await client.threads.create()

@@ -1,18 +1,18 @@
 import uuid
 from typing import List, Optional, Dict, Any
 from langchain_core.messages import HumanMessage
-from langgraph.graph import LangGraphRunnableConfig
-from ..shared.types import ContextDocument
-from ..utils import (
+from langchain_core.runnables import RunnableConfig
+from shared.src.types import ContextDocument
+from agents.src.utils import (
     convert_pdf_to_text,
     create_context_document_messages,
     get_model_config
 )
-from ..shared.constants import OC_HIDE_FROM_UI_KEY
+from shared.src.constants import OC_HIDE_FROM_UI_KEY
 
 async def convert_context_document_to_human_message(
     messages: List[HumanMessage],
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Optional[HumanMessage]:
     if not messages:
         return None
@@ -38,7 +38,7 @@ async def convert_context_document_to_human_message(
 
 async def fix_misformatted_context_doc_message(
     message: HumanMessage,
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Optional[List[HumanMessage]]:
     if isinstance(message.content, str):
         return None

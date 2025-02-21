@@ -1,11 +1,11 @@
 import uuid
 from typing import Dict, Any
 from langchain_core.messages import AIMessage
-from langgraph.graph import LangGraphRunnableConfig
-from ..state import OpenCanvasGraphState
-from ..shared.types import ArtifactV3, ArtifactCodeV3
-from ...utils import get_model_config, get_model_from_config
-from ..prompts import (
+from langchain_core.runnables import RunnableConfig
+from agents.src.open_canvas.state import OpenCanvasGraphState
+from shared.src.types import ArtifactV3, ArtifactCodeV3
+from agents.src.utils import get_model_config, get_model_from_config
+from agents.src.open_canvas.prompts import (
     ADD_COMMENTS_TO_CODE_ARTIFACT_PROMPT,
     ADD_LOGS_TO_CODE_ARTIFACT_PROMPT,
     FIX_BUGS_CODE_ARTIFACT_PROMPT,
@@ -14,7 +14,7 @@ from ..prompts import (
 
 async def rewrite_code_artifact_theme(
     state: OpenCanvasGraphState,
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Dict[str, Any]:
     model_config = get_model_config(config)
     small_model = await get_model_from_config(config)

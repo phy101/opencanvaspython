@@ -1,6 +1,6 @@
-from ..prompts import NEW_ARTIFACT_PROMPT
-from ..shared.types import ArtifactCodeV3, ArtifactMarkdownV3, ProgrammingLanguageOptions
-from .schemas import ArtifactToolSchema
+from agents.src.open_canvas.prompts import NEW_ARTIFACT_PROMPT
+from shared.src.types import ArtifactCodeV3, ArtifactMarkdownV3, ProgrammingLanguageOptions
+from agents.src.open_canvas.nodes.generate_artifact.schemas import ArtifactToolSchema
 
 def format_new_artifact_prompt(memories_str: str, model_name: str) -> str:
     disable_cot = ""

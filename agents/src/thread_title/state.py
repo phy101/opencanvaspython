@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage
-from ..shared.types import ArtifactV3
+from shared.src.types import ArtifactV3
 
 class TitleGenerationState(BaseModel):
     """State representation for Title Generation graph"""

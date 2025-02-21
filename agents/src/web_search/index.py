@@ -1,8 +1,22 @@
 from langgraph.graph import StateGraph, END, START
-from .state import WebSearchState
-from .nodes import search, query_generator, classify_message
+from agents.src.web_search.state import WebSearchState
+from agents.src.web_search.nodes.classify_message import classify_message
+from agents.src.web_search.nodes.query_generator import query_generator
+from agents.src.web_search.nodes.search import search
+import dotenv
+
+dotenv.load_dotenv()
+
 
 def search_or_end_conditional(state: WebSearchState) -> str:
+    """Determine whether to continue with search or end the graph.
+    
+    Args:
+        state: Current state of web search
+        
+    Returns:
+        str: Either "query_generator" or END
+    """
     if state.should_search:
         return "query_generator"
     return END

@@ -1,18 +1,18 @@
 from typing import Dict, Any
 from langchain_core.messages import AIMessage
-from langgraph.graph import LangGraphRunnableConfig
-from ..state import OpenCanvasGraphState
-from ..shared.types import ArtifactV3, Reflections
-from ...utils import (
+from langchain_core.runnables import RunnableConfig
+from agents.src.open_canvas.state import OpenCanvasGraphState
+from shared.src.types import ArtifactV3, Reflections
+from agents.src.utils import (
     ensure_store_in_config,
     format_reflections,
     get_model_from_config
 )
-from ..prompts import FOLLOWUP_ARTIFACT_PROMPT
+from agents.src.open_canvas.prompts import FOLLOWUP_ARTIFACT_PROMPT
 
 async def generate_followup(
     state: OpenCanvasGraphState,
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Dict[str, Any]:
     small_model = await get_model_from_config(
         config, 

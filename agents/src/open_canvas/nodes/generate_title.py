@@ -1,21 +1,19 @@
 import os
 from typing import Dict, Any
-from langchain.langgraph_sdk import Client
-from langgraph.graph import LangGraphRunnableConfig
-from ..state import OpenCanvasGraphState
+from langgraph_sdk import get_client
+from langchain_core.runnables import RunnableConfig
+from agents.src.open_canvas.state import OpenCanvasGraphState
 
-async def generate_title_node(
+async def generate_title(
     state: OpenCanvasGraphState,
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Dict[str, Any]:
     if len(state.messages) > 2:
         # Skip if not first human-AI conversation
         return {}
 
     try:
-        lang_graph_client = Client(
-            api_url=f"http://localhost:{os.getenv('PORT', '8000')}"
-        )
+        lang_graph_client = get_client(url=f"http://localhost:{os.getenv('PORT', '8000')}")
 
         title_input = {
             "messages": state.messages,

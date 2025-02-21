@@ -1,21 +1,21 @@
 from typing import Optional, Dict, Any
 from uuid import uuid4
 from langchain_core.messages import BaseMessage
-from langgraph.graph import LangGraphRunnableConfig
-from ..state import OpenCanvasGraphState
-from ..shared.types import (
+from langchain_core.runnables import RunnableConfig
+from agents.src.open_canvas.state import OpenCanvasGraphState
+from shared.src.types import (
     ArtifactCodeV3,
     ArtifactMarkdownV3,
     ArtifactV3,
     CustomQuickAction,
     Reflections
 )
-from ...utils import (
+from agents.src.utils import (
     ensure_store_in_config,
     format_reflections,
     get_model_from_config
 )
-from ..prompts import (
+from shared.src.prompts.quick_actions import (
     CUSTOM_QUICK_ACTION_ARTIFACT_CONTENT_PROMPT,
     CUSTOM_QUICK_ACTION_ARTIFACT_PROMPT_PREFIX,
     CUSTOM_QUICK_ACTION_CONVERSATION_CONTEXT,
@@ -30,7 +30,7 @@ def format_messages(messages: list[BaseMessage]) -> str:
 
 async def custom_action(
     state: OpenCanvasGraphState,
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Dict[str, Any]:
     if not state.custom_quick_action_id:
         raise ValueError("No custom quick action ID found")

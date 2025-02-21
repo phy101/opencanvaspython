@@ -3,7 +3,9 @@ from ..state import WebSearchState
 from shared.src.types import SearchResult
 import os
 from langchain_community.tools import TavilySearchResults
+import dotenv
 
+dotenv.load_dotenv()
 
 async def search(state: WebSearchState) -> Dict[str, Any]:
    

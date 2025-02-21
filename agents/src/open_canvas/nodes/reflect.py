@@ -1,17 +1,15 @@
 import os
 from typing import Dict, Any
-from langchain.langgraph_sdk import Client
-from langgraph.graph import LangGraphRunnableConfig
-from ..state import OpenCanvasGraphState
+from langgraph_sdk import get_client
+from langchain_core.runnables import RunnableConfig
+from agents.src.open_canvas.state import OpenCanvasGraphState
 
-async def reflect_node(
+async def reflect(
     state: OpenCanvasGraphState,
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Dict[str, Any]:
     try:
-        lang_graph_client = Client(
-            api_url=f"http://localhost:{os.getenv('PORT', '8000')}"
-        )
+        lang_graph_client = get_client(url=f"http://localhost:{os.getenv('PORT', '8000')}")
 
         reflection_input = {
             "messages": state._messages,

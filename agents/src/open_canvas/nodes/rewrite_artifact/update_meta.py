@@ -1,19 +1,24 @@
 from typing import Optional, Dict, Any
 from langchain_core.messages import BaseMessage
-from langgraph.graph import LangGraphRunnableConfig
-from ..state import OpenCanvasGraphState
-from ..shared.types import ArtifactV3
-from ...utils import (
+from langchain_core.runnables import RunnableConfig
+from agents.src.open_canvas.state import OpenCanvasGraphState
+from shared.src.types import ArtifactV3
+from agents.src.utils import (
     get_model_from_config,
     is_using_o1_mini_model,
-    format_artifact_content
+    format_artifact_content,
+    get_formatted_reflections,
+    
 )
-from .schemas import OPTIONALLY_UPDATE_ARTIFACT_META_SCHEMA
-from ...prompts import GET_TITLE_TYPE_REWRITE_ARTIFACT
+
+from shared.src.utils.artifacts import get_artifact_content
+
+from agents.src.open_canvas.nodes.rewrite_artifact.schemas import OptionallyUpdateArtifactMetaSchema
+from agents.src.open_canvas.prompts import GET_TITLE_TYPE_REWRITE_ARTIFACT
 
 async def optionally_update_artifact_meta(
     state: OpenCanvasGraphState,
-    config: LangGraphRunnableConfig
+    config: RunnableConfig
 ) -> Optional[Dict[str, Any]]:
     try:
         # Initialize model with tool calling

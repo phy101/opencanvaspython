@@ -4,10 +4,13 @@ from typing import Dict, Any
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage
 from langgraph.graph import StateGraph, START
-from .state import SummarizerGraphState
+from langgraph_sdk import get_client
+from agents.src.summarizer.state import SummarizerGraphState
 from shared.src.constants import OC_SUMMARIZED_MESSAGE_KEY
-from utils import format_messages
-from aiohttp import ClientSession
+from agents.src.utils import format_messages
+import dotenv
+
+dotenv.load_dotenv()
 
 SUMMARIZER_PROMPT = """You're a professional AI summarizer assistant.
 As a professional summarizer, create a concise and comprehensive summary of the provided text, while adhering to these guidelines:
@@ -50,14 +53,11 @@ Here is the summary:
         additional_kwargs={OC_SUMMARIZED_MESSAGE_KEY: True}
     )
 
-    # Update thread state
-    async with ClientSession() as session:
-        async with session.patch(
-            f"http://localhost:{os.getenv('PORT', '8000')}/threads/{state.thread_id}",
-            json={"_messages": [new_message]}
-        ) as response:
-            if response.status != 200:
-                raise ValueError(f"Failed to update thread state: {response.status}")
+    # Update thread state using langgraph_sdk
+    client = get_client(url=f"http://localhost:{os.getenv('PORT', '8000')}")
+    await client.threads.update(state.thread_id, {
+        "_messages": [new_message]
+    })
 
     return {}
 

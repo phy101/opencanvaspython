@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Tuple
 from pydantic import BaseModel
 from langchain_core.messages import AIMessage, BaseMessage
-from ..models import THINKING_MODELS
+from shared.src.models import THINKING_MODELS
 
 class ThinkingAndResponseTokens(BaseModel):
     thinking: str
