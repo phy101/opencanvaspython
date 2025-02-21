@@ -3,7 +3,8 @@ name = "opencanvaspython"
 version = "0.1.0"
 description = "OpenCanvas Python Implementation. This code is ported from Typescript to Python. Original Typescript code by Brace Sproul. Ported to Python by Paulo Hermanny"
 authors = [
-    { name = "Paulo Hermanny", email = "paulo@statistica.ai" },
+    { name = "Brace Sproul" },
+    { Ported by = "Paulo Hermanny" },
 ]
 dependencies = [
     "langgraph",
